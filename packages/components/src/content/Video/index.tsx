@@ -44,6 +44,7 @@ export function Video(rawProps: IVideoProps) {
   if (resizeMode) {
     (style as any)['object-fit'] = resizeMode;
   }
+  const resolvedSrc = typeof source === 'string' ? source : source?.uri;
   return (
     // eslint-disable-next-line jsx-a11y/media-has-caption -- decorative UI video, no captions needed
     <video
@@ -52,8 +53,11 @@ export function Video(rawProps: IVideoProps) {
       muted={muted}
       style={style as any}
       {...(props as any)}
-      src={typeof source === 'string' ? source : source?.uri}
+      src={resolvedSrc}
       loop={repeat}
+      onError={(e) => {
+        (props as any).onError?.(e);
+      }
     />
   );
 }

@@ -27,7 +27,6 @@ function BasicNFTListItem(props: IProps) {
   const { nft, onPress, isAllNetworks } = props;
   const [isVideo, setIsVideo] = useState<boolean>(!!nft.metadata?.image);
   const { network } = useAccountData({ networkId: nft.networkId });
-
   return (
     <Stack
       key={nft.itemId}
@@ -65,6 +64,7 @@ function BasicNFTListItem(props: IProps) {
                   zIndex: 1,
                 }}
                 autoPlay={false}
+                muted
                 source={{ uri: nft.metadata?.image }}
               />
             </Stack>

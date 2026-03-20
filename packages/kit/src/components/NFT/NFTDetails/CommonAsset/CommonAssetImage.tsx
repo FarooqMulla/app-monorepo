@@ -18,7 +18,6 @@ const unSupportedImage = ['data:image/svg+xml;'];
 function CommonAssetImage(props: IProps) {
   const { nft } = props;
   const [isVideo, setIsVideo] = useState<boolean>(!!nft.metadata?.image);
-
   const isUnSupportedImageInNative = useMemo(
     () =>
       platformEnv.isNative &&
@@ -36,6 +35,7 @@ function CommonAssetImage(props: IProps) {
           <Video
             source={{ uri: nft.metadata?.image }}
             controls
+            muted
             onError={() => setIsVideo(false)}
             style={{
               width: '100%',

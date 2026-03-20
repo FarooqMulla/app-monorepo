@@ -5,9 +5,18 @@ import { usePropsAndStyle } from '@onekeyhq/components/src/shared/tamagui';
 import type { IVideoProps } from './type';
 import type { ViewStyle } from 'react-native';
 
-export function Video({ muted, ...rawProps }: IVideoProps) {
+export function Video({ muted, autoPlay, ...rawProps }: IVideoProps) {
   const [props, style] = usePropsAndStyle(rawProps);
-  return <NativeVideo style={style as ViewStyle} muted={muted} {...props} />;
+  const { autoPlay: _autoPlay, ...restProps } = props as any;
+  const paused = autoPlay === false;
+  return (
+    <NativeVideo
+      style={style as ViewStyle}
+      muted={muted}
+      paused={paused}
+      {...restProps}
+    />
+  );
 }
 
 export type * from './type';
