@@ -129,3 +129,11 @@ debug.log
 # Local documentation files
 .local_docs/
 /.claude/worktrees
+
+# BMad framework
+.agents/
+.claude/skills/bmad-*/
+.cursor/skills/bmad-*/
+_bmad/
+_bmad-output/
+docs/superpowers/
