@@ -73,10 +73,16 @@ export function NativeBottomTabView({
 
         return null;
       }}
-      getLazy={({ route }) => descriptors[route.key]?.options.lazy ?? true}
-      getFreezeOnBlur={({ route }) =>
-        descriptors[route.key]?.options.freezeOnBlur
-      }
+      getLazy={({ route }) => {
+        // Preloaded routes bypass lazy — treat as already loaded
+        if (state.preloadedRouteKeys.includes(route.key)) return false;
+        return descriptors[route.key]?.options.lazy ?? true;
+      }}
+      getFreezeOnBlur={({ route }) => {
+        // Don't freeze preloaded routes so they can complete their first render
+        if (state.preloadedRouteKeys.includes(route.key)) return false;
+        return descriptors[route.key]?.options.freezeOnBlur;
+      }}
       getSceneStyle={({ route }) => descriptors[route.key]?.options.sceneStyle}
       onTabLongPress={(index) => {
         const route = state.routes[index];

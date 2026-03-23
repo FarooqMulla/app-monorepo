@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useRef } from 'react';
 
+import { CommonActions } from '@react-navigation/native';
 import { noop } from 'lodash';
 
 import type { ITabNavigatorConfig } from '@onekeyhq/components';
@@ -8,13 +9,15 @@ import {
   Portal,
   Stack,
   TabStackNavigator,
+  rootNavigationRef,
   useIsSplitView,
   useMedia,
   useSplitMainView,
   useSplitSubView,
 } from '@onekeyhq/components';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
-import type { ETabRoutes } from '@onekeyhq/shared/src/routes';
+import { ETabRoutes } from '@onekeyhq/shared/src/routes';
+import { ERootRoutes } from '@onekeyhq/shared/src/routes/root';
 
 import { Footer } from '../../components/Footer';
 import { useGlobalShortcuts } from '../../hooks/useGlobalShortcuts';
@@ -83,6 +86,70 @@ export function TabNavigator() {
 
   useGlobalShortcuts();
   useCheckTabsChangedInDev(config);
+
+  // Progressively preload all tabs during idle time (web/desktop only).
+  // On native, lazy is still false so this is unnecessary.
+  // IMPORTANT: Must use `target` to send the PRELOAD action directly to the
+  // Tab Navigator. Without `target`, the action goes to the focused Stack first,
+  // and StackRouter's PRELOAD handler blindly creates preloadedRoutes for
+  // unknown route names (unlike TabRouter which checks existence), causing
+  // StackView to crash with "Cannot read properties of undefined (reading 'props')".
+  // Also do NOT pass params — mismatched params cause TabRouter to regenerate
+  // route keys via nanoid(), which unmounts/remounts screens.
+  useEffect(() => {
+    // Only preload high-frequency tabs; the rest load on first visit
+    const preloadQueue = [
+      ETabRoutes.Swap,
+      ETabRoutes.Market,
+      ETabRoutes.Discovery,
+    ];
+
+    // Interval between preloads (ms) — keep it generous to avoid frame drops
+    const PRELOAD_INTERVAL_MS = 2500;
+
+    let index = 0;
+    let timerId: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
+
+    function preloadNext() {
+      if (cancelled || index >= preloadQueue.length) return;
+
+      // Resolve the Tab Navigator's state key so we can target it directly
+      const rootState = rootNavigationRef.current?.getRootState();
+      const mainRoute = rootState?.routes?.find(
+        (r) => r.name === ERootRoutes.Main,
+      );
+      const tabStateKey = mainRoute?.state?.key;
+
+      if (!tabStateKey) {
+        // Tab navigator not ready yet, retry after interval
+        timerId = setTimeout(preloadNext, PRELOAD_INTERVAL_MS);
+        return;
+      }
+
+      try {
+        rootNavigationRef.current?.dispatch({
+          ...CommonActions.preload(preloadQueue[index]),
+          target: tabStateKey,
+        });
+      } catch {
+        // Tab might not exist in current config (e.g. perp disabled)
+      }
+      index += 1;
+      timerId = setTimeout(preloadNext, PRELOAD_INTERVAL_MS);
+    }
+
+    // Start first preload after initial idle
+    const idleHandle = requestIdleCallback(() => {
+      preloadNext();
+    });
+
+    return () => {
+      cancelled = true;
+      cancelIdleCallback(idleHandle);
+      if (timerId !== undefined) clearTimeout(timerId);
+    };
+  }, []);
 
   return (
     <>

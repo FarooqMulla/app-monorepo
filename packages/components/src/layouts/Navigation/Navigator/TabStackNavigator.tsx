@@ -157,7 +157,7 @@ export function TabStackNavigator<RouteName extends string>({
       screenOptions={{
         headerShown: false,
         freezeOnBlur: true,
-        lazy: false,
+        lazy: true,
       }}
     >
       {tabScreens}
