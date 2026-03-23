@@ -75,7 +75,7 @@ export function NativeBottomTabView({
       }}
       getLazy={({ route }) => {
         // Preloaded routes bypass lazy — treat as already loaded
-        if (state.preloadedRouteKeys.includes(route.key)) return false;
+        if (state.preloadedRouteKeys?.includes(route.key)) return false;
         return descriptors[route.key]?.options.lazy ?? true;
       }}
       getFreezeOnBlur={({ route }) => {
