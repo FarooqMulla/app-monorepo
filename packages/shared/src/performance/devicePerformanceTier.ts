@@ -21,6 +21,7 @@
  *   await calibrateDevicePerformanceTier();
  */
 
+import { defaultLogger } from '../logger/logger';
 import { syncStorage } from '../storage/instance/syncStorageInstance';
 import { EAppSyncStorageKeys } from '../storage/syncStorageKeys';
 
@@ -77,11 +78,17 @@ export function getDevicePerformanceTier(): EDevicePerformanceTier {
     stored === EDevicePerformanceTier.low
   ) {
     cachedTier = stored;
+    defaultLogger.app.perf.logTime({
+      message: `Device tier loaded from cache: ${cachedTier}`,
+    });
     return cachedTier;
   }
 
   // First launch — default to medium (safe middle ground)
   cachedTier = EDevicePerformanceTier.medium;
+  defaultLogger.app.perf.logTime({
+    message: `Device tier defaulting to: ${cachedTier} (first launch)`,
+  });
   return cachedTier;
 }
 
@@ -116,6 +123,16 @@ export async function calibrateDevicePerformanceTier(): Promise<EDevicePerforman
     EAppSyncStorageKeys.onekey_device_performance_tier,
     tier,
   );
+
+  defaultLogger.app.perf.logTime({
+    message: `Device tier calibrated: ${tier}`,
+    data: {
+      tier,
+      uiVisibleTime,
+      highThreshold: HIGH_PERF_THRESHOLD_MS,
+      lowThreshold: LOW_PERF_THRESHOLD_MS,
+    },
+  });
 
   return tier;
 }
