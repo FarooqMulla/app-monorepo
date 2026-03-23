@@ -80,7 +80,7 @@ export function NativeBottomTabView({
       }}
       getFreezeOnBlur={({ route }) => {
         // Don't freeze preloaded routes so they can complete their first render
-        if (state.preloadedRouteKeys.includes(route.key)) return false;
+        if (state.preloadedRouteKeys?.includes(route.key)) return false;
         return descriptors[route.key]?.options.freezeOnBlur;
       }}
       getSceneStyle={({ route }) => descriptors[route.key]?.options.sceneStyle}
