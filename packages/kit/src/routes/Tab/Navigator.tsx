@@ -15,6 +15,11 @@ import {
   useSplitMainView,
   useSplitSubView,
 } from '@onekeyhq/components';
+import {
+  EDevicePerformanceTier,
+  calibrateDevicePerformanceTier,
+  getDevicePerformanceTier,
+} from '@onekeyhq/shared/src/performance/devicePerformanceTier';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 import { ETabRoutes } from '@onekeyhq/shared/src/routes';
 import { ERootRoutes } from '@onekeyhq/shared/src/routes/root';
@@ -87,27 +92,50 @@ export function TabNavigator() {
   useGlobalShortcuts();
   useCheckTabsChangedInDev(config);
 
-  // Progressively preload high-frequency tabs during idle time.
-  // This shared effect runs on web, desktop, and native because tabs are
-  // lazy-loaded on all platforms.
+  // Progressively preload tabs during idle time, driven by device performance tier.
+  // Tabs are lazy-loaded on all platforms; this ensures key tabs are
+  // pre-rendered in the background before the user navigates to them.
   // IMPORTANT: Must use `target` to send the PRELOAD action directly to the
   // Tab Navigator. Without `target`, the action goes to the focused Stack first,
   // and StackRouter's PRELOAD handler blindly creates preloadedRoutes for
-  // unknown route names (unlike TabRouter which checks existence), causing
-  // StackView to crash with "Cannot read properties of undefined (reading 'props')".
+  // unknown route names, causing StackView to crash.
   // Also do NOT pass params — mismatched params cause TabRouter to regenerate
   // route keys via nanoid(), which unmounts/remounts screens.
   useEffect(() => {
-    // Only preload high-frequency tabs; the rest load on first visit
-    const preloadQueue = [
-      ETabRoutes.Swap,
-      ETabRoutes.Market,
-      ETabRoutes.Discovery,
-    ];
+    const tier = getDevicePerformanceTier();
 
-    // Interval between preloads (ms) — keep it generous to avoid frame drops
+    // high  → preload all tabs
+    // medium → preload high-frequency tabs only
+    // low   → no preload, fully on-demand
+    let preloadQueue: ETabRoutes[];
+    switch (tier) {
+      case EDevicePerformanceTier.high:
+        preloadQueue = [
+          ETabRoutes.Swap,
+          ETabRoutes.Market,
+          ETabRoutes.Discovery,
+          ETabRoutes.Earn,
+          ETabRoutes.WebviewPerpTrade,
+          ETabRoutes.Perp,
+          ETabRoutes.DeviceManagement,
+          ETabRoutes.ReferFriends,
+        ];
+        break;
+      case EDevicePerformanceTier.medium:
+        preloadQueue = [
+          ETabRoutes.Swap,
+          ETabRoutes.Market,
+          ETabRoutes.Discovery,
+        ];
+        break;
+      default:
+        preloadQueue = [];
+        break;
+    }
+
+    if (preloadQueue.length === 0) return;
+
     const PRELOAD_INTERVAL_MS = 2500;
-
     let index = 0;
     let timerId: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
@@ -115,7 +143,6 @@ export function TabNavigator() {
     function preloadNext() {
       if (cancelled || index >= preloadQueue.length) return;
 
-      // Resolve the Tab Navigator's state key so we can target it directly
       const rootState = rootNavigationRef.current?.getRootState();
       const mainRoute = rootState?.routes?.find(
         (r) => r.name === ERootRoutes.Main,
@@ -123,7 +150,6 @@ export function TabNavigator() {
       const tabStateKey = mainRoute?.state?.key;
 
       if (!tabStateKey) {
-        // Tab navigator not ready yet, retry after interval
         timerId = setTimeout(preloadNext, PRELOAD_INTERVAL_MS);
         return;
       }
@@ -140,7 +166,6 @@ export function TabNavigator() {
       timerId = setTimeout(preloadNext, PRELOAD_INTERVAL_MS);
     }
 
-    // Start first preload after initial idle
     const idleHandle = requestIdleCallback(() => {
       preloadNext();
     });
@@ -150,6 +175,14 @@ export function TabNavigator() {
       cancelIdleCallback(idleHandle);
       if (timerId !== undefined) clearTimeout(timerId);
     };
+  }, []);
+
+  // Calibrate performance tier after UI is visible (async, result used on next launch)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void calibrateDevicePerformanceTier();
+    }, 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
