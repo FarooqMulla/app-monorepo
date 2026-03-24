@@ -554,8 +554,7 @@ const BaseDevSettingsSection = () => {
                               : 0;
                           Dialog.debugMessage({
                             debugMessage: {
-                              devicePerformanceTier:
-                                getDevicePerformanceTier(),
+                              devicePerformanceTier: getDevicePerformanceTier(),
                               startupTimeAt:
                                 await LaunchOptionsManager.getStartupTimeAt(),
                               jsReadyTimeAt:

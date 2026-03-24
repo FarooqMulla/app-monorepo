@@ -5,7 +5,7 @@
  *   A) Cached tier from previous launch (sync, instant)
  *   B) Runtime calibration via UI-visible time after first render (async)
  *
- * Tier behaviour (consumers decide how to use it):
+ * Tier behavior (consumers decide how to use it):
  *   high   — device is fast, can do more work eagerly
  *   medium — moderate device, be selective
  *   low    — slow device, defer as much as possible
@@ -100,9 +100,8 @@ export function getDevicePerformanceTier(): EDevicePerformanceTier {
  * The result takes effect on the *next* app launch.
  */
 export async function calibrateDevicePerformanceTier(): Promise<EDevicePerformanceTier> {
-  const { default: LaunchOptionsManager } = await import(
-    '../modules/LaunchOptionsManager'
-  );
+  const { default: LaunchOptionsManager } =
+    await import('../modules/LaunchOptionsManager');
 
   const uiVisibleTime = await LaunchOptionsManager.getUIVisibleTime();
 
@@ -119,10 +118,7 @@ export async function calibrateDevicePerformanceTier(): Promise<EDevicePerforman
 
   // Persist for next launch
   cachedTier = tier;
-  syncStorage.set(
-    EAppSyncStorageKeys.onekey_device_performance_tier,
-    tier,
-  );
+  syncStorage.set(EAppSyncStorageKeys.onekey_device_performance_tier, tier);
 
   defaultLogger.app.perf.logTime({
     message: `Device tier calibrated: ${tier}`,
@@ -140,14 +136,9 @@ export async function calibrateDevicePerformanceTier(): Promise<EDevicePerforman
 /**
  * Force-set the tier (useful for dev settings / testing).
  */
-export function setDevicePerformanceTier(
-  tier: EDevicePerformanceTier,
-): void {
+export function setDevicePerformanceTier(tier: EDevicePerformanceTier): void {
   cachedTier = tier;
-  syncStorage.set(
-    EAppSyncStorageKeys.onekey_device_performance_tier,
-    tier,
-  );
+  syncStorage.set(EAppSyncStorageKeys.onekey_device_performance_tier, tier);
 }
 
 /**
