@@ -18,7 +18,7 @@ import { SectionPressItem } from './SectionPressItem';
 
 import type { NavigationContainerRef } from '@react-navigation/native';
 
-type INavigationRef = RefObject<NavigationContainerRef<any>>;
+type INavigationRef = RefObject<NavigationContainerRef<any> | null>;
 
 function getRootState(ref: INavigationRef) {
   return ref.current?.getRootState() as INavigationStateLike | undefined;
