@@ -135,7 +135,9 @@ export function TabNavigator() {
 
     if (preloadQueue.length === 0) return;
 
-    const PRELOAD_INTERVAL_MS = 2500;
+    // High-perf devices can handle faster preloading; medium devices need more breathing room
+    const PRELOAD_INTERVAL_MS =
+      tier === EDevicePerformanceTier.high ? 1500 : 2500;
     let index = 0;
     let timerId: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
