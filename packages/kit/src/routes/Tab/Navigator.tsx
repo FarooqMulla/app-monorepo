@@ -87,8 +87,9 @@ export function TabNavigator() {
   useGlobalShortcuts();
   useCheckTabsChangedInDev(config);
 
-  // Progressively preload all tabs during idle time (web/desktop only).
-  // On native, lazy is still false so this is unnecessary.
+  // Progressively preload high-frequency tabs during idle time.
+  // This shared effect runs on web, desktop, and native because tabs are
+  // lazy-loaded on all platforms.
   // IMPORTANT: Must use `target` to send the PRELOAD action directly to the
   // Tab Navigator. Without `target`, the action goes to the focused Stack first,
   // and StackRouter's PRELOAD handler blindly creates preloadedRoutes for
