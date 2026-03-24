@@ -4,6 +4,7 @@
  * Classifies the device into high / medium / low tiers based on:
  *   A) Cached tier from previous launch (sync, instant)
  *   B) Runtime calibration via UI-visible time after first render (async)
+ *   C) Device memory (>= 4GB high, 2–4GB medium, < 2GB low; skipped if unavailable)
  *
  * Tier behavior (consumers decide how to use it):
  *   high   — device is fast, can do more work eagerly
@@ -25,6 +26,8 @@ import { defaultLogger } from '../logger/logger';
 import { syncStorage } from '../storage/instance/syncStorageInstance';
 import { EAppSyncStorageKeys } from '../storage/syncStorageKeys';
 
+import { getDeviceMemoryGB } from './deviceMemory';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -45,10 +48,44 @@ const HIGH_PERF_THRESHOLD_MS = 1500;
 const LOW_PERF_THRESHOLD_MS = 3000;
 
 // ---------------------------------------------------------------------------
+// Thresholds (GB) — Device total physical memory
+// ---------------------------------------------------------------------------
+
+const HIGH_MEM_THRESHOLD_GB = 4;
+const LOW_MEM_THRESHOLD_GB = 2;
+
+// ---------------------------------------------------------------------------
 // Module-level cache (survives across calls within the same JS session)
 // ---------------------------------------------------------------------------
 
 let cachedTier: EDevicePerformanceTier | undefined;
+
+// ---------------------------------------------------------------------------
+// Tier ordering (for combining multiple signals)
+// ---------------------------------------------------------------------------
+
+const TIER_RANK: Record<EDevicePerformanceTier, number> = {
+  [EDevicePerformanceTier.low]: 0,
+  [EDevicePerformanceTier.medium]: 1,
+  [EDevicePerformanceTier.high]: 2,
+};
+
+function lowerTier(
+  a: EDevicePerformanceTier,
+  b: EDevicePerformanceTier,
+): EDevicePerformanceTier {
+  return TIER_RANK[a] <= TIER_RANK[b] ? a : b;
+}
+
+function getMemoryTier(memoryGB: number): EDevicePerformanceTier {
+  if (memoryGB >= HIGH_MEM_THRESHOLD_GB) {
+    return EDevicePerformanceTier.high;
+  }
+  if (memoryGB < LOW_MEM_THRESHOLD_GB) {
+    return EDevicePerformanceTier.low;
+  }
+  return EDevicePerformanceTier.medium;
+}
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -105,16 +142,25 @@ export async function calibrateDevicePerformanceTier(): Promise<EDevicePerforman
 
   const uiVisibleTime = await LaunchOptionsManager.getUIVisibleTime();
 
-  let tier: EDevicePerformanceTier;
-
+  // Tier from startup speed
+  let timeTier: EDevicePerformanceTier;
   if (uiVisibleTime > 0 && uiVisibleTime < HIGH_PERF_THRESHOLD_MS) {
-    tier = EDevicePerformanceTier.high;
+    timeTier = EDevicePerformanceTier.high;
   } else if (uiVisibleTime > 0 && uiVisibleTime > LOW_PERF_THRESHOLD_MS) {
-    tier = EDevicePerformanceTier.low;
+    timeTier = EDevicePerformanceTier.low;
   } else {
-    // Between thresholds, or uiVisibleTime unavailable (0)
-    tier = EDevicePerformanceTier.medium;
+    timeTier = EDevicePerformanceTier.medium;
   }
+
+  // Tier from device memory (skip if unavailable)
+  const memoryGB = await getDeviceMemoryGB();
+  let memoryTier: EDevicePerformanceTier | null = null;
+  if (memoryGB !== null) {
+    memoryTier = getMemoryTier(memoryGB);
+  }
+
+  // Combine: take the lower (more conservative) of the two signals
+  const tier = memoryTier !== null ? lowerTier(timeTier, memoryTier) : timeTier;
 
   // Persist for next launch
   cachedTier = tier;
@@ -124,6 +170,9 @@ export async function calibrateDevicePerformanceTier(): Promise<EDevicePerforman
     message: `Device tier calibrated: ${tier}`,
     data: {
       tier,
+      timeTier,
+      memoryTier,
+      memoryGB,
       uiVisibleTime,
       highThreshold: HIGH_PERF_THRESHOLD_MS,
       lowThreshold: LOW_PERF_THRESHOLD_MS,
