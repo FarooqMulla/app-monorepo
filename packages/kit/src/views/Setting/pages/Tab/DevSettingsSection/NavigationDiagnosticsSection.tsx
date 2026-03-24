@@ -12,7 +12,7 @@ import { stableStringify } from '@onekeyhq/shared/src/utils/stringUtils';
 
 import {
   type INavigationStateLike,
-  inspectTabNavigators,
+  inspectMainRoutes,
 } from './navigationDiagnosticsUtils';
 import { SectionPressItem } from './SectionPressItem';
 
@@ -26,6 +26,9 @@ function getRootState(ref: INavigationRef) {
 
 export function NavigationDiagnosticsSection() {
   const { copyText } = useClipboard();
+  const hasTabletMainViewNavigation = Boolean(
+    tabletMainViewNavigationRef.current,
+  );
 
   const handleCopyRootState = useCallback(
     (label: string, ref: INavigationRef) => {
@@ -46,37 +49,35 @@ export function NavigationDiagnosticsSection() {
     [copyText],
   );
 
-  const handleInspectTabNavigators = useCallback(
+  const handleInspectMainRoutes = useCallback(
     (label: string, ref: INavigationRef) => {
       const rootState = getRootState(ref);
       if (!rootState) {
-        Toast.error({
-          title: `${label} rootState unavailable`,
-          message: 'Navigation container is not ready yet.',
+        Dialog.confirm({
+          title: `${label} unavailable`,
+          description: 'Navigation not ready.',
         });
         return;
       }
 
-      const inspection = inspectTabNavigators(rootState);
-      const activeRoutePath = inspection.activeRoutePath.join(' > ');
+      const inspection = inspectMainRoutes(rootState);
+      const mainRouteDetails = inspection.mainRoutes
+        .map((item, index) => {
+          const routes = item.tabRouteNames.length
+            ? item.tabRouteNames.join(', ')
+            : '(empty)';
+          const active = item.activeTabRouteName
+            ? `\nActive: ${item.activeTabRouteName}`
+            : '';
+          return `${index + 1}. Tabs: ${routes}${active}`;
+        })
+        .join('\n');
 
-      if (inspection.hasTwoOrMoreTabNavigators) {
-        Toast.error({
-          title: `${label}: found ${inspection.tabNavigatorCount} tab navigators`,
-          message: activeRoutePath,
-        });
-      } else {
-        Toast.success({
-          title: `${label}: ${inspection.tabNavigatorCount} tab navigator`,
-          message: activeRoutePath,
-        });
-      }
-
-      Dialog.debugMessage({
-        debugMessage: {
-          source: label,
-          ...inspection,
-        },
+      Dialog.confirm({
+        title: inspection.hasTwoOrMoreMainRoutes
+          ? `${label}: duplicated`
+          : `${label}: OK`,
+        description: `${inspection.mainRouteCount} Main\n${mainRouteDetails || 'No Main tabs'}`,
       });
     },
     [],
@@ -86,42 +87,46 @@ export function NavigationDiagnosticsSection() {
     <>
       <SectionPressItem
         icon="ClipboardOutline"
-        title="Copy rootNavigationRef rootState"
-        subtitle="复制 rootNavigationRef 的 rootState 到剪贴板"
+        title="Copy rootState"
+        subtitle="rootNavigationRef"
         onPress={() => {
           handleCopyRootState('rootNavigationRef', rootNavigationRef);
         }}
       />
       <SectionPressItem
-        icon="ClipboardOutline"
-        title="Copy tabletMainViewNavigationRef rootState"
-        subtitle="复制 tabletMainViewNavigationRef 的 rootState 到剪贴板"
-        onPress={() => {
-          handleCopyRootState(
-            'tabletMainViewNavigationRef',
-            tabletMainViewNavigationRef,
-          );
-        }}
-      />
-      <SectionPressItem
         icon="SearchOutline"
-        title="Check rootNavigationRef for duplicate tabNavigators"
-        subtitle="检测 rootNavigationRef 的 rootState 是否存在两个或以上 tabNavigator"
+        title="Check root tabs"
+        subtitle="rootNavigationRef"
         onPress={() => {
-          handleInspectTabNavigators('rootNavigationRef', rootNavigationRef);
+          handleInspectMainRoutes('rootNavigationRef', rootNavigationRef);
         }}
       />
-      <SectionPressItem
-        icon="SearchOutline"
-        title="Check tabletMainViewNavigationRef for duplicate tabNavigators"
-        subtitle="检测 tabletMainViewNavigationRef 的 rootState 是否存在两个或以上 tabNavigator"
-        onPress={() => {
-          handleInspectTabNavigators(
-            'tabletMainViewNavigationRef',
-            tabletMainViewNavigationRef,
-          );
-        }}
-      />
+      {hasTabletMainViewNavigation ? (
+        <>
+          <SectionPressItem
+            icon="ClipboardOutline"
+            title="Copy tabletState"
+            subtitle="tabletMainViewNavigationRef"
+            onPress={() => {
+              handleCopyRootState(
+                'tabletMainViewNavigationRef',
+                tabletMainViewNavigationRef,
+              );
+            }}
+          />
+          <SectionPressItem
+            icon="SearchOutline"
+            title="Check tablet tabs"
+            subtitle="tabletMainViewNavigationRef"
+            onPress={() => {
+              handleInspectMainRoutes(
+                'tabletMainViewNavigationRef',
+                tabletMainViewNavigationRef,
+              );
+            }}
+          />
+        </>
+      ) : null}
     </>
   );
 }

@@ -1,5 +1,6 @@
+import { ERootRoutes } from '@onekeyhq/shared/src/routes';
+
 export type INavigationStateLike = {
-  type?: string;
   key?: string;
   index?: number;
   routeNames?: string[];
@@ -10,18 +11,16 @@ export type INavigationStateLike = {
   }>;
 };
 
-export type ITabNavigatorMatch = {
+export type IMainRouteMatch = {
   key?: string;
-  path: string;
-  routeNames: string[];
-  activeRouteName?: string;
+  tabRouteNames: string[];
+  activeTabRouteName?: string;
 };
 
-export type ITabNavigatorInspection = {
-  hasTwoOrMoreTabNavigators: boolean;
-  tabNavigatorCount: number;
-  activeRoutePath: string[];
-  tabNavigators: ITabNavigatorMatch[];
+export type IMainRouteInspection = {
+  hasTwoOrMoreMainRoutes: boolean;
+  mainRouteCount: number;
+  mainRoutes: IMainRouteMatch[];
 };
 
 function getSafeRouteIndex(index: number | undefined, length: number) {
@@ -34,82 +33,35 @@ function getSafeRouteIndex(index: number | undefined, length: number) {
   return index;
 }
 
-function getRouteNames(state: INavigationStateLike) {
-  if (state.routeNames?.length) {
+function getRouteNames(state: INavigationStateLike | undefined) {
+  if (state?.routeNames?.length) {
     return state.routeNames;
   }
-  return (state.routes ?? [])
+  return (state?.routes ?? [])
     .map((route) => route.name)
     .filter((routeName): routeName is string => Boolean(routeName));
 }
 
-function collectTabNavigators(
-  state: INavigationStateLike | undefined,
-  path: string[] = ['root'],
-): ITabNavigatorMatch[] {
-  if (!state) {
-    return [];
-  }
-
-  const routes = state.routes ?? [];
-  const routeIndex = getSafeRouteIndex(state.index, routes.length);
-  const activeRouteName = routes[routeIndex]?.name;
-  const matches =
-    state.type === 'tab'
-      ? [
-          {
-            key: state.key,
-            path: path.join(' > '),
-            routeNames: getRouteNames(state),
-            activeRouteName,
-          },
-        ]
-      : [];
-
-  routes.forEach((route, index) => {
-    if (!route.state) {
-      return;
-    }
-    const routeName = route.name ?? `route[${index}]`;
-    matches.push(...collectTabNavigators(route.state, [...path, routeName]));
-  });
-
-  return matches;
+function getActiveRouteName(state: INavigationStateLike | undefined) {
+  const routes = state?.routes ?? [];
+  const routeIndex = getSafeRouteIndex(state?.index, routes.length);
+  return routes[routeIndex]?.name;
 }
 
-function getActiveRoutePath(
+export function inspectMainRoutes(
   state: INavigationStateLike | undefined,
-  path: string[] = ['root'],
-): string[] {
-  if (!state) {
-    return path;
-  }
+): IMainRouteInspection {
+  const mainRoutes = (state?.routes ?? [])
+    .filter((route) => route.name === ERootRoutes.Main)
+    .map((route) => ({
+      key: route.key,
+      tabRouteNames: getRouteNames(route.state),
+      activeTabRouteName: getActiveRouteName(route.state),
+    }));
 
-  const routes = state.routes ?? [];
-  if (!routes.length) {
-    return path;
-  }
-
-  const routeIndex = getSafeRouteIndex(state.index, routes.length);
-  const activeRoute = routes[routeIndex];
-  const routeName = activeRoute?.name ?? `route[${routeIndex}]`;
-  const nextPath = [...path, routeName];
-
-  if (!activeRoute?.state) {
-    return nextPath;
-  }
-
-  return getActiveRoutePath(activeRoute.state, nextPath);
-}
-
-export function inspectTabNavigators(
-  state: INavigationStateLike | undefined,
-): ITabNavigatorInspection {
-  const tabNavigators = collectTabNavigators(state);
   return {
-    hasTwoOrMoreTabNavigators: tabNavigators.length >= 2,
-    tabNavigatorCount: tabNavigators.length,
-    activeRoutePath: getActiveRoutePath(state),
-    tabNavigators,
+    hasTwoOrMoreMainRoutes: mainRoutes.length >= 2,
+    mainRouteCount: mainRoutes.length,
+    mainRoutes,
   };
 }
