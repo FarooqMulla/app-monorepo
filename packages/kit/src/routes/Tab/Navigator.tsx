@@ -15,6 +15,7 @@ import {
   useSplitMainView,
   useSplitSubView,
 } from '@onekeyhq/components';
+import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import {
   EDevicePerformanceTier,
   calibrateDevicePerformanceTier,
@@ -103,6 +104,10 @@ export function TabNavigator() {
   // route keys via nanoid(), which unmounts/remounts screens.
   useEffect(() => {
     const tier = getDevicePerformanceTier();
+
+    defaultLogger.app.perf.logTime({
+      message: `Tab preload strategy: tier=${tier}`,
+    });
 
     // high  → preload all tabs
     // medium → preload high-frequency tabs only

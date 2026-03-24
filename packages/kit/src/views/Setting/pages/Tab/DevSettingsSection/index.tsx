@@ -60,6 +60,7 @@ import {
   isGooglePlayServicesAvailable,
   openWebViewInGooglePlay,
 } from '@onekeyhq/shared/src/modules3rdParty/webview-checker';
+import { getDevicePerformanceTier } from '@onekeyhq/shared/src/performance/devicePerformanceTier';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 import { EModalSettingRoutes } from '@onekeyhq/shared/src/routes';
 import appStorage from '@onekeyhq/shared/src/storage/appStorage';
@@ -553,6 +554,8 @@ const BaseDevSettingsSection = () => {
                               : 0;
                           Dialog.debugMessage({
                             debugMessage: {
+                              devicePerformanceTier:
+                                getDevicePerformanceTier(),
                               startupTimeAt:
                                 await LaunchOptionsManager.getStartupTimeAt(),
                               jsReadyTimeAt:
