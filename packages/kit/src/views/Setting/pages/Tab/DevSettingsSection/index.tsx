@@ -87,6 +87,7 @@ import { DeviceToken } from './DeviceToken';
 import { HapticsPanel } from './HapticsPanel';
 import { ImagePanel } from './ImagePanel';
 import { IpTableSelector } from './IpTableSelector';
+import { NavigationDiagnosticsSection } from './NavigationDiagnosticsSection';
 import { NetInfo } from './NetInfo';
 import { NotificationDevSettings } from './NotificationDevSettings';
 import { NotificationPayloadTest } from './NotificationPayloadTest';
@@ -361,6 +362,13 @@ const BaseDevSettingsSection = () => {
         key: 'performance',
         title: 'Performance & Crash & Error & Unit Tests',
         description: '性能 崩溃 错误 单元测试',
+      },
+      {
+        key: 'navigation',
+        title: 'Navigation Diagnostics',
+        description: 'Navigation rootState tabNavigator 排查',
+        keywords:
+          'navigation rootstate rootnavigationref tabletmainviewnavigationref tabnavigator router',
       },
       {
         key: 'data',
@@ -1078,6 +1086,25 @@ const BaseDevSettingsSection = () => {
                         }}
                       />
                       <CrashDevSettings />
+                    </Accordion.Content>
+                  </Accordion.HeightAnimator>
+                </Accordion.Item>
+              );
+            case 'navigation':
+              return (
+                <Accordion.Item value="navigation" key="navigation">
+                  <DevSettingsAccordionTrigger
+                    title="Navigation Diagnostics"
+                    description="Navigation rootState / tabNavigator 排查"
+                    icon="LayoutWindowOutline"
+                    {...pinProps}
+                  />
+                  <Accordion.HeightAnimator animation="quick">
+                    <Accordion.Content
+                      animation="quick"
+                      exitStyle={{ opacity: 0 }}
+                    >
+                      <NavigationDiagnosticsSection />
                     </Accordion.Content>
                   </Accordion.HeightAnimator>
                 </Accordion.Item>
