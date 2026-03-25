@@ -66,9 +66,7 @@ export const LazyLoadRootTabPage = (
   function RootTabPageWithMountLog(props: any) {
     const route = useRoute();
     useEffect(() => {
-      defaultLogger.app.perf.logTime({
-        message: `Tab page mounted: ${route.name}`,
-      });
+      defaultLogger.app.perf.tabPageMounted(route.name);
     }, [route.name]);
     return <Page {...props} />;
   }

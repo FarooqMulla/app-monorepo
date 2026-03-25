@@ -105,9 +105,7 @@ export function TabNavigator() {
   useEffect(() => {
     const tier = getDevicePerformanceTier();
 
-    defaultLogger.app.perf.logTime({
-      message: `Tab preload strategy: tier=${tier}`,
-    });
+    defaultLogger.app.perf.tabPreloadStrategy(tier);
 
     // high  → preload all tabs
     // medium → preload high-frequency tabs only

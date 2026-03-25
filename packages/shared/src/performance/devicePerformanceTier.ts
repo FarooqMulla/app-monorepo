@@ -128,16 +128,18 @@ export function getDevicePerformanceTier(): EDevicePerformanceTier {
     stored === EDevicePerformanceTier.low
   ) {
     cachedTier = stored;
-    defaultLogger.app.perf.logTime({
-      message: `Device tier loaded from cache: ${cachedTier}`,
+    defaultLogger.app.perf.deviceTierDetected({
+      tier: cachedTier,
+      source: 'cache',
     });
     return cachedTier;
   }
 
   // First launch — compute from static hardware info (sync)
   cachedTier = computeTierFromHardware();
-  defaultLogger.app.perf.logTime({
-    message: `Device tier computed from hardware: ${cachedTier} (first launch)`,
+  defaultLogger.app.perf.deviceTierDetected({
+    tier: cachedTier,
+    source: 'hardware',
     data: {
       memoryGB: getDeviceMemoryGBSync(),
     },
@@ -182,10 +184,10 @@ export async function calibrateDevicePerformanceTier(): Promise<EDevicePerforman
   cachedTier = tier;
   syncStorage.set(EAppSyncStorageKeys.onekey_device_performance_tier, tier);
 
-  defaultLogger.app.perf.logTime({
-    message: `Device tier calibrated: ${tier}`,
+  defaultLogger.app.perf.deviceTierDetected({
+    tier,
+    source: 'calibration',
     data: {
-      tier,
       timeTier,
       memoryTier,
       memoryGB,
