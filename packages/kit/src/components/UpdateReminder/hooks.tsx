@@ -986,6 +986,26 @@ export const useAppUpdateInfo = (isFullModal = false, autoCheck = true) => {
     appUpdateInfo,
   ]);
 
+  // Silent‐ready watcher — independent of isFirstLaunch.
+  // The main effect above is gated by isFirstLaunch (module‐level flag),
+  // so it cannot react to status changes that arrive after the first run
+  // (e.g. silent download completes in-session, or persist‐atom hydrates
+  // after the initial render on restart).  This dedicated effect covers
+  // both cases.  showSilentUpdateDialog is already throttled, so a
+  // redundant call from the main effect on first launch is harmless.
+  useEffect(() => {
+    if (!autoCheck) return;
+    if (appUpdateInfo.updateStrategy !== EUpdateStrategy.silent) return;
+    if (appUpdateInfo.status !== EAppUpdateStatus.ready) return;
+    if (isFirstLaunchAfterUpdated(appUpdateInfo)) return;
+    showSilentUpdateDialog();
+    // deps: only re-run when status or updateStrategy changes.
+    // appUpdateInfo is omitted intentionally — including the object ref
+    // would re-fire on every unrelated field mutation.
+    // showSilentUpdateDialog is a stable throttled ref, safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoCheck, appUpdateInfo.status, appUpdateInfo.updateStrategy]);
+
   const onUpdateAction = useCallback(() => {
     switch (appUpdateInfo.status) {
       case EAppUpdateStatus.done:
