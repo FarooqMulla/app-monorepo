@@ -1,17 +1,14 @@
-// Native (iOS/Android): expo-device totalMemory (bytes → GB)
+// Native (iOS/Android): expo-device totalMemory (sync constant, bytes → GB)
 import * as ExpoDevice from 'expo-device';
 
-let cached: number | null | undefined;
-
-export async function getDeviceMemoryGB(): Promise<number | null> {
-  if (cached !== undefined) {
-    return cached;
-  }
+export function getDeviceMemoryGBSync(): number | null {
   const totalMem = ExpoDevice.totalMemory;
   if (typeof totalMem === 'number' && totalMem > 0) {
-    cached = totalMem / (1024 * 1024 * 1024);
-    return cached;
+    return totalMem / (1024 * 1024 * 1024);
   }
-  cached = null;
-  return cached;
+  return null;
+}
+
+export async function getDeviceMemoryGB(): Promise<number | null> {
+  return getDeviceMemoryGBSync();
 }

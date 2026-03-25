@@ -26,7 +26,7 @@ import { defaultLogger } from '../logger/logger';
 import { syncStorage } from '../storage/instance/syncStorageInstance';
 import { EAppSyncStorageKeys } from '../storage/syncStorageKeys';
 
-import { getDeviceMemoryGB } from './deviceMemory';
+import { getDeviceMemoryGB, getDeviceMemoryGBSync } from './deviceMemory';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -87,6 +87,19 @@ function getMemoryTier(memoryGB: number): EDevicePerformanceTier {
   return EDevicePerformanceTier.medium;
 }
 
+/**
+ * Compute tier synchronously from device memory.
+ * Used on first launch when no cached tier exists.
+ */
+function computeTierFromHardware(): EDevicePerformanceTier {
+  const memGB = getDeviceMemoryGBSync();
+  if (memGB !== null) {
+    return getMemoryTier(memGB);
+  }
+  // No hardware info available, default to medium
+  return EDevicePerformanceTier.medium;
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -96,7 +109,7 @@ function getMemoryTier(memoryGB: number): EDevicePerformanceTier {
  *
  * - Reads from in-memory cache first (fastest)
  * - Falls back to MMKV sync storage (persisted from previous launch)
- * - Defaults to `medium` on first-ever launch
+ * - Computes from device memory on first-ever launch
  *
  * Safe to call at any point, including during component render.
  */
@@ -121,10 +134,13 @@ export function getDevicePerformanceTier(): EDevicePerformanceTier {
     return cachedTier;
   }
 
-  // First launch — default to medium (safe middle ground)
-  cachedTier = EDevicePerformanceTier.medium;
+  // First launch — compute from static hardware info (sync)
+  cachedTier = computeTierFromHardware();
   defaultLogger.app.perf.logTime({
-    message: `Device tier defaulting to: ${cachedTier} (first launch)`,
+    message: `Device tier computed from hardware: ${cachedTier} (first launch)`,
+    data: {
+      memoryGB: getDeviceMemoryGBSync(),
+    },
   });
   return cachedTier;
 }
