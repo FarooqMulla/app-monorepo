@@ -28,6 +28,19 @@ export class AppPerfScene extends BaseScene {
   }
 
   @LogToLocal()
+  public profilerRender(params: {
+    id: string;
+    phase: string;
+    actualDuration: number;
+    baseDuration: number;
+    renderCount: number;
+    totalActualDuration: number;
+    elapsedMs: number;
+  }) {
+    return params;
+  }
+
+  @LogToLocal()
   public tabPreloadStrategy(tier: string) {
     return { tier };
   }
@@ -45,7 +58,7 @@ export class AppPerfScene extends BaseScene {
   @LogToLocal()
   public deviceTierDetected(params: {
     tier: string;
-    source: 'cache' | 'hardware' | 'calibration';
+    source: 'cache' | 'default' | 'calibration';
     data?: any;
   }) {
     return params;

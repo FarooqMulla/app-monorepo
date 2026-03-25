@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { Profiler, useCallback, useRef, useState } from 'react';
 
 import DAppConnectExtensionFloatingTrigger from '@onekeyhq/kit/src/views/DAppConnection/components/DAppConnectExtensionFloatingTrigger';
+import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import { useDebugComponentRemountLog } from '@onekeyhq/shared/src/utils/debug/debugUtils';
 import { EAccountSelectorSceneName } from '@onekeyhq/shared/types';
 
@@ -52,14 +53,39 @@ function SelectedAccountsMapTest() {
 
 function HomePageContainer() {
   const [isHide, setIsHide] = useState(false);
+  const renderCountRef = useRef(0);
+  const totalActualDurationRef = useRef(0);
 
   useDebugComponentRemountLog({ name: 'HomePageContainer' });
+
+  const onProfilerRender = useCallback(
+    (
+      id: string,
+      phase: 'mount' | 'update' | 'nested-update',
+      actualDuration: number,
+      baseDuration: number,
+    ) => {
+      renderCountRef.current += 1;
+      totalActualDurationRef.current += actualDuration;
+      defaultLogger.app.perf.profilerRender({
+        id,
+        phase,
+        actualDuration: Math.round(actualDuration),
+        baseDuration: Math.round(baseDuration),
+        renderCount: renderCountRef.current,
+        totalActualDuration: Math.round(totalActualDurationRef.current),
+        elapsedMs: Date.now() - (globalThis.$$onekeyStartupTimeAt || 0),
+      });
+    },
+    [],
+  );
 
   if (isHide) {
     return null;
   }
   const sceneName = EAccountSelectorSceneName.home;
   return (
+    <Profiler id="HomePageContainer" onRender={onProfilerRender}>
     <TabletHomeContainer>
       <AccountSelectorProviderMirror
         config={{
@@ -89,6 +115,7 @@ function HomePageContainer() {
         ) : null}
       </AccountSelectorProviderMirror>
     </TabletHomeContainer>
+    </Profiler>
   );
 }
 

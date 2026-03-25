@@ -87,19 +87,6 @@ function getMemoryTier(memoryGB: number): EDevicePerformanceTier {
   return EDevicePerformanceTier.medium;
 }
 
-/**
- * Compute tier synchronously from device memory.
- * Used on first launch when no cached tier exists.
- */
-function computeTierFromHardware(): EDevicePerformanceTier {
-  const memGB = getDeviceMemoryGBSync();
-  if (memGB !== null) {
-    return getMemoryTier(memGB);
-  }
-  // No hardware info available, default to medium
-  return EDevicePerformanceTier.medium;
-}
-
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -140,7 +127,7 @@ export function getDevicePerformanceTier(): EDevicePerformanceTier {
   cachedTier = EDevicePerformanceTier.medium;
   defaultLogger.app.perf.deviceTierDetected({
     tier: cachedTier,
-    source: 'hardware',
+    source: 'default',
     data: {
       memoryGB: getDeviceMemoryGBSync(),
     },
