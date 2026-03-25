@@ -7,6 +7,8 @@
 //   Inter_600SemiBold,
 // } from '@expo-google-fonts/inter';
 // import { useFonts } from 'expo-font';
+import { useLayoutEffect } from 'react';
+
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -14,6 +16,7 @@ import { Toast } from '@onekeyhq/components';
 import { SyncHomeAccountToDappAccountProvider } from '@onekeyhq/kit/src/views/Discovery/components/SyncDappAccountToHomeProvider';
 import appGlobals from '@onekeyhq/shared/src/appGlobals';
 import LazyLoad from '@onekeyhq/shared/src/lazyLoad';
+import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import { debugLandingLog } from '@onekeyhq/shared/src/performance/init';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 import { useDebugComponentRemountLog } from '@onekeyhq/shared/src/utils/debug/debugUtils';
@@ -60,6 +63,11 @@ export function KitProvider(props: any = {}) {
   }
 
   useDebugComponentRemountLog({ name: 'KitProvider' });
+
+  defaultLogger.app.perf.markRenderStart();
+  useLayoutEffect(() => {
+    defaultLogger.app.perf.markRenderPhase('KitProvider:committed');
+  }, []);
 
   // useFonts({
   //   Inter_400Regular,

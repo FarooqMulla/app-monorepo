@@ -1,11 +1,12 @@
 import type { PropsWithChildren } from 'react';
-import { memo, useMemo, useRef } from 'react';
+import { memo, useLayoutEffect, useMemo, useRef } from 'react';
 
 import {
   NavigationContainer as NavigationContainerComponent,
   RouterEventProvider,
 } from '@onekeyhq/components';
 import { RootNavigator } from '@onekeyhq/kit/src/routes';
+import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import { debugLandingLog } from '@onekeyhq/shared/src/performance/init';
 
 import { useRouterConfig } from '../../routes/config';
@@ -13,6 +14,9 @@ import { useRouterConfig } from '../../routes/config';
 import { TabFreezeOnBlurContainer } from './TabFreezeOnBlurContainer';
 
 function BasicNavigation({ children }: PropsWithChildren) {
+  useLayoutEffect(() => {
+    defaultLogger.app.perf.markRenderPhase('NavigationContainer:committed');
+  }, []);
   if (process.env.NODE_ENV !== 'production') {
     debugLandingLog('BasicNavigation render');
   }

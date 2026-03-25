@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import { CommonActions } from '@react-navigation/native';
 import { noop } from 'lodash';
@@ -90,6 +90,9 @@ export function TabNavigator() {
   const { gtMd } = useMedia();
   const isTabletDetailView = useSplitSubView();
 
+  useLayoutEffect(() => {
+    defaultLogger.app.perf.markRenderPhase('TabNavigator:committed');
+  }, []);
   useGlobalShortcuts();
   useCheckTabsChangedInDev(config);
 

@@ -1,3 +1,5 @@
+import { useLayoutEffect } from 'react';
+
 import { RootSiblingParent } from 'react-native-root-siblings';
 
 import {
@@ -7,6 +9,7 @@ import {
 } from '@onekeyhq/components';
 import appGlobals from '@onekeyhq/shared/src/appGlobals';
 import LazyLoad from '@onekeyhq/shared/src/lazyLoad';
+import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import { debugLandingLog } from '@onekeyhq/shared/src/performance/init';
 
 import { WalletBackupPreCheckContainer } from '../../components/WalletBackup';
@@ -91,6 +94,9 @@ const splitMainViewContext = { viewType: ESplitViewType.MAIN };
 const splitSubViewContext = { viewType: ESplitViewType.SUB };
 
 export function Container() {
+  useLayoutEffect(() => {
+    defaultLogger.app.perf.markRenderPhase('Container:committed');
+  }, []);
   if (process.env.NODE_ENV !== 'production') {
     debugLandingLog('Container render');
   }
