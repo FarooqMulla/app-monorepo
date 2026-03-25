@@ -1,7 +1,10 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import type { ComponentType } from 'react';
 
+import { useRoute } from '@react-navigation/native';
+
 import { Stack } from '@onekeyhq/components';
+import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import LazyLoad from '@onekeyhq/shared/src/lazyLoad';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 
@@ -55,6 +58,19 @@ export function LazyLoadPage<
 }
 
 // prevent useEffect triggers when tab loaded on Native
-export const LazyLoadRootTabPage = (factory: () => Promise<{ default: any }>) =>
+export const LazyLoadRootTabPage = (
+  factory: () => Promise<{ default: any }>,
+) => {
   // prevent hooks run
-  LazyLoadPage(factory, platformEnv.isNative ? 1 : undefined);
+  const Page = LazyLoadPage(factory, platformEnv.isNative ? 1 : undefined);
+  function RootTabPageWithMountLog(props: any) {
+    const route = useRoute();
+    useEffect(() => {
+      defaultLogger.app.perf.logTime({
+        message: `Tab page mounted: ${route.name}`,
+      });
+    }, [route.name]);
+    return <Page {...props} />;
+  }
+  return memo(RootTabPageWithMountLog);
+};

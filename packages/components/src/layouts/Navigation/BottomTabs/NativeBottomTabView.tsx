@@ -7,6 +7,8 @@ import {
   type TabNavigationState,
 } from '@react-navigation/native';
 
+import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
+
 import type {
   NativeBottomTabDescriptorMap,
   NativeBottomTabNavigationConfig,
@@ -75,7 +77,12 @@ export function NativeBottomTabView({
       }}
       getLazy={({ route }) => {
         // Preloaded routes bypass lazy — treat as already loaded
-        if (state.preloadedRouteKeys?.includes(route.key)) return false;
+        if (state.preloadedRouteKeys?.includes(route.key)) {
+          defaultLogger.app.perf.logTime({
+            message: `Tab preload mount: ${route.name}`,
+          });
+          return false;
+        }
         return descriptors[route.key]?.options.lazy ?? true;
       }}
       getFreezeOnBlur={({ route }) => {

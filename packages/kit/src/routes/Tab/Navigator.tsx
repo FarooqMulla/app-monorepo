@@ -112,26 +112,35 @@ export function TabNavigator() {
     // high  → preload all tabs
     // medium → preload high-frequency tabs only
     // low   → no preload, fully on-demand
+    // NOTE: DeviceManagement and ReferFriends only exist on desktop/web
+    const nativeHighQueue = [
+      ETabRoutes.Swap,
+      ETabRoutes.Discovery,
+      ETabRoutes.Perp,
+    ];
+    const desktopHighQueue = [
+      ...nativeHighQueue,
+      ETabRoutes.DeviceManagement,
+      ETabRoutes.ReferFriends,
+    ];
+    const nativeMediumQueue = [ETabRoutes.Swap];
+    const desktopMediumQueue = [
+      ETabRoutes.Swap,
+      ETabRoutes.Market,
+      ETabRoutes.Discovery,
+    ];
+
     let preloadQueue: ETabRoutes[];
     switch (tier) {
       case EDevicePerformanceTier.high:
-        preloadQueue = [
-          ETabRoutes.Swap,
-          ETabRoutes.Market,
-          ETabRoutes.Discovery,
-          ETabRoutes.Earn,
-          ETabRoutes.WebviewPerpTrade,
-          ETabRoutes.Perp,
-          ETabRoutes.DeviceManagement,
-          ETabRoutes.ReferFriends,
-        ];
+        preloadQueue = platformEnv.isNative
+          ? nativeHighQueue
+          : desktopHighQueue;
         break;
       case EDevicePerformanceTier.medium:
-        preloadQueue = [
-          ETabRoutes.Swap,
-          ETabRoutes.Market,
-          ETabRoutes.Discovery,
-        ];
+        preloadQueue = platformEnv.isNative
+          ? nativeMediumQueue
+          : desktopMediumQueue;
         break;
       default:
         preloadQueue = [];
