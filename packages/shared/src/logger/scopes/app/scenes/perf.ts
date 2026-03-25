@@ -15,7 +15,9 @@ export class AppPerfScene extends BaseScene {
   }
 
   public markRenderStart() {
-    _renderStartAt = Date.now();
+    if (_renderStartAt === 0) {
+      _renderStartAt = Date.now();
+    }
   }
 
   public markRenderPhase(name: string) {
