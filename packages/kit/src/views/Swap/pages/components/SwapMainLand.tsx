@@ -20,7 +20,6 @@ import {
 } from '@onekeyhq/components';
 import backgroundApiProxy from '@onekeyhq/kit/src/background/instance/backgroundApiProxy';
 import { AccountSelectorProviderMirror } from '@onekeyhq/kit/src/components/AccountSelector';
-import { LazyPageContainer } from '@onekeyhq/kit/src/components/LazyPageContainer';
 import useAppNavigation from '@onekeyhq/kit/src/hooks/useAppNavigation';
 import { useCustomRpcAvailability } from '@onekeyhq/kit/src/hooks/useCustomRpcAvailability';
 import { useTokenDetailActions } from '@onekeyhq/kit/src/states/jotai/contexts/marketV2';
@@ -1339,9 +1338,7 @@ const SwapMainLandWithPageType = (props: ISwapMainLoadProps) => {
       <MarketWatchListProviderMirrorV2
         storeName={EJotaiContextStoreNames.marketWatchListV2}
       >
-        <LazyPageContainer>
-          <SwapMainLoad {...props} pageType={props?.pageType} />
-        </LazyPageContainer>
+        <SwapMainLoad {...props} pageType={props?.pageType} />
       </MarketWatchListProviderMirrorV2>
     </SwapProviderMirror>
   );
