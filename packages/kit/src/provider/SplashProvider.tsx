@@ -40,7 +40,9 @@ export const useDisplaySplash =
           const launchCallback = async () => {
             hasLaunchEventsExecutedRef.current = true;
             try {
-              defaultLogger.app.perf.markRenderPhase('pendingInstallTask:start');
+              defaultLogger.app.perf.markRenderPhase(
+                'pendingInstallTask:start',
+              );
               await backgroundApiProxy.servicePendingInstallTask.processPendingInstallTask();
               defaultLogger.app.perf.markRenderPhase('pendingInstallTask:done');
               setDisplaySplash(true);
