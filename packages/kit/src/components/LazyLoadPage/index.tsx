@@ -4,8 +4,8 @@ import type { ComponentType } from 'react';
 import { useRoute } from '@react-navigation/native';
 
 import { Stack } from '@onekeyhq/components';
-import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import LazyLoad from '@onekeyhq/shared/src/lazyLoad';
+import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 
 // Helper type to extract component props from a lazy-loaded module
