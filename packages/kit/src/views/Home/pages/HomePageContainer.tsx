@@ -86,35 +86,36 @@ function HomePageContainer() {
   const sceneName = EAccountSelectorSceneName.home;
   return (
     <Profiler id="HomePageContainer" onRender={onProfilerRender}>
-    <TabletHomeContainer>
-      <AccountSelectorProviderMirror
-        config={{
-          sceneName,
-          sceneUrl: '',
-        }}
-        enabledNum={[0]}
-      >
-        <HomePageView
-          key={sceneName}
-          sceneName={sceneName}
-          onPressHide={() => setIsHide((v) => !v)}
-        />
         <DAppConnectExtensionFloatingTrigger />
-        <OnboardingOnMount />
-        <NotificationRegisterDaily />
-        <BTCFreshAddressProvider />
-        {/* <UrlAccountAutoReplaceHistory num={0} /> */}
+      <TabletHomeContainer>
+        <AccountSelectorProviderMirror
+          config={{
+            sceneName,
+            sceneUrl: '',
+          }}
+          enabledNum={[0]}
+        >
+          <HomePageView
+            key={sceneName}
+            sceneName={sceneName}
+            onPressHide={() => setIsHide((v) => !v)}
+          />
+          <DAppConnectExtensionFloatingTrigger />
+          <OnboardingOnMount />
+          <NotificationRegisterDaily />
+          <BTCFreshAddressProvider />
+          {/* <UrlAccountAutoReplaceHistory num={0} /> */}
 
-        {process.env.NODE_ENV !== 'production' ? (
-          <>
-            <SelectedAccountsMapTest />
-            <SelectedAccountTest />
-            <ActiveAccountTest />
-            <EmptyRenderTest />
-          </>
-        ) : null}
-      </AccountSelectorProviderMirror>
-    </TabletHomeContainer>
+          {process.env.NODE_ENV !== 'production' ? (
+            <>
+              <SelectedAccountsMapTest />
+              <SelectedAccountTest />
+              <ActiveAccountTest />
+              <EmptyRenderTest />
+            </>
+          ) : null}
+        </AccountSelectorProviderMirror>
+      </TabletHomeContainer>
     </Profiler>
   );
 }
