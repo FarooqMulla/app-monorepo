@@ -135,8 +135,9 @@ export function getDevicePerformanceTier(): EDevicePerformanceTier {
     return cachedTier;
   }
 
-  // First launch — compute from static hardware info (sync)
-  cachedTier = computeTierFromHardware();
+  // First launch — default to medium (conservative).
+  // The real tier will be calibrated after UI is visible and persisted for next launch.
+  cachedTier = EDevicePerformanceTier.medium;
   defaultLogger.app.perf.deviceTierDetected({
     tier: cachedTier,
     source: 'hardware',
