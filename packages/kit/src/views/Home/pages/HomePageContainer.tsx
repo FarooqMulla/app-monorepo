@@ -86,7 +86,6 @@ function HomePageContainer() {
   const sceneName = EAccountSelectorSceneName.home;
   return (
     <Profiler id="HomePageContainer" onRender={onProfilerRender}>
-        <DAppConnectExtensionFloatingTrigger />
       <TabletHomeContainer>
         <AccountSelectorProviderMirror
           config={{
