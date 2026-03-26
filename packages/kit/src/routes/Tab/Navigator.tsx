@@ -128,7 +128,7 @@ export function TabNavigator() {
       ETabRoutes.DeviceManagement,
       ETabRoutes.ReferFriends,
     ];
-    const nativeMediumQueue = [ETabRoutes.Swap];
+    const nativeMediumQueue = [ETabRoutes.Swap, ETabRoutes.Perp];
     const desktopMediumQueue = [
       ETabRoutes.Swap,
       ETabRoutes.Market,
