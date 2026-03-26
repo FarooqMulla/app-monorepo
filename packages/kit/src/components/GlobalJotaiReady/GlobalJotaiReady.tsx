@@ -29,7 +29,10 @@ export function GlobalJotaiReady({ children }: { children: any }) {
     let isMounted = true;
     void globalJotaiStorageReadyHandler.ready.then((ready) => {
       if (!isMounted) return;
-      defaultLogger.app.perf.renderPhase({ name: 'GlobalJotaiReady:asyncReady', elapsedMs: getRenderElapsedMs() });
+      defaultLogger.app.perf.renderPhase({
+        name: 'GlobalJotaiReady:asyncReady',
+        elapsedMs: getRenderElapsedMs(),
+      });
       startTransition(() => {
         if (process.env.NODE_ENV !== 'production') {
           debugLandingLog('GlobalJotaiReady resolved', `ready=${ready}`);
@@ -46,6 +49,5 @@ export function GlobalJotaiReady({ children }: { children: any }) {
     return <View testID="GlobalJotaiReady-not-ready-placeholder" />;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return children;
+  return children as JSX.Element;
 }
