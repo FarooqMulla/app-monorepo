@@ -92,7 +92,10 @@ export function TabNavigator() {
   const isTabletDetailView = useSplitSubView();
 
   useLayoutEffect(() => {
-    defaultLogger.app.perf.renderPhase({ name: 'TabNavigator:committed', elapsedMs: getRenderElapsedMs() });
+    defaultLogger.app.perf.renderPhase({
+      name: 'TabNavigator:committed',
+      elapsedMs: getRenderElapsedMs(),
+    });
   }, []);
   useGlobalShortcuts();
   useCheckTabsChangedInDev(config);

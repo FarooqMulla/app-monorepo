@@ -16,7 +16,10 @@ import { TabFreezeOnBlurContainer } from './TabFreezeOnBlurContainer';
 
 function BasicNavigation({ children }: PropsWithChildren) {
   useLayoutEffect(() => {
-    defaultLogger.app.perf.renderPhase({ name: 'NavigationContainer:committed', elapsedMs: getRenderElapsedMs() });
+    defaultLogger.app.perf.renderPhase({
+      name: 'NavigationContainer:committed',
+      elapsedMs: getRenderElapsedMs(),
+    });
   }, []);
   if (process.env.NODE_ENV !== 'production') {
     debugLandingLog('BasicNavigation render');

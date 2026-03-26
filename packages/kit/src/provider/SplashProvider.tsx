@@ -46,7 +46,10 @@ export const useDisplaySplash =
                 elapsedMs: getRenderElapsedMs(),
               });
               await backgroundApiProxy.servicePendingInstallTask.processPendingInstallTask();
-              defaultLogger.app.perf.renderPhase({ name: 'pendingInstallTask:done', elapsedMs: getRenderElapsedMs() });
+              defaultLogger.app.perf.renderPhase({
+                name: 'pendingInstallTask:done',
+                elapsedMs: getRenderElapsedMs(),
+              });
               setDisplaySplash(true);
             } catch (error) {
               defaultLogger.app.appUpdate.log(

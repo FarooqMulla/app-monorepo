@@ -70,7 +70,10 @@ export function KitProvider(props: any = {}) {
 
   markRenderStart();
   useLayoutEffect(() => {
-    defaultLogger.app.perf.renderPhase({ name: 'KitProvider:committed', elapsedMs: getRenderElapsedMs() });
+    defaultLogger.app.perf.renderPhase({
+      name: 'KitProvider:committed',
+      elapsedMs: getRenderElapsedMs(),
+    });
   }, []);
 
   // useFonts({

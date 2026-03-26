@@ -15,11 +15,17 @@ export type ISplashProps = PropsWithChildren;
 const noop = () => {};
 export function Splash({ children }: ISplashProps) {
   useLayoutEffect(() => {
-    defaultLogger.app.perf.renderPhase({ name: 'Splash:committed', elapsedMs: getRenderElapsedMs() });
+    defaultLogger.app.perf.renderPhase({
+      name: 'Splash:committed',
+      elapsedMs: getRenderElapsedMs(),
+    });
   }, []);
   const resolveSplash = useRef<() => void>(noop);
   const handleExitComplete = useCallback(() => {
-    defaultLogger.app.perf.renderPhase({ name: 'Splash:exitComplete', elapsedMs: getRenderElapsedMs() });
+    defaultLogger.app.perf.renderPhase({
+      name: 'Splash:exitComplete',
+      elapsedMs: getRenderElapsedMs(),
+    });
     globalThis.$$onekeyUIVisibleAt = Date.now();
     if (typeof globalThis.nativePerformanceNow === 'function') {
       globalThis.$$onekeyUIVisibleFromPerformanceNow =
@@ -30,7 +36,10 @@ export function Splash({ children }: ISplashProps) {
   const handleLayout = useCallback((e: LayoutChangeEvent) => {
     const { height } = e.nativeEvent.layout;
     if (height) {
-      defaultLogger.app.perf.renderPhase({ name: 'Splash:onLayout', elapsedMs: getRenderElapsedMs() });
+      defaultLogger.app.perf.renderPhase({
+        name: 'Splash:onLayout',
+        elapsedMs: getRenderElapsedMs(),
+      });
       // close the splash after the react commit phase.
       setTimeout(() => {
         resolveSplash.current?.();

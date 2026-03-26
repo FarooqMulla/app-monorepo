@@ -96,7 +96,10 @@ const splitSubViewContext = { viewType: ESplitViewType.SUB };
 
 export function Container() {
   useLayoutEffect(() => {
-    defaultLogger.app.perf.renderPhase({ name: 'Container:committed', elapsedMs: getRenderElapsedMs() });
+    defaultLogger.app.perf.renderPhase({
+      name: 'Container:committed',
+      elapsedMs: getRenderElapsedMs(),
+    });
   }, []);
   if (process.env.NODE_ENV !== 'production') {
     debugLandingLog('Container render');
