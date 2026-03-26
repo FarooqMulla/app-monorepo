@@ -154,9 +154,12 @@ export function TabNavigator() {
 
     if (preloadQueue.length === 0) return;
 
-    // High-perf devices can handle faster preloading; medium devices need more breathing room
+    // Native needs more breathing room than desktop; medium devices need even more
+    const isNative = platformEnv.isNative;
     const PRELOAD_INTERVAL_MS =
-      tier === EDevicePerformanceTier.high ? 1500 : 2500;
+      tier === EDevicePerformanceTier.high
+        ? (isNative ? 2000 : 1500)
+        : (isNative ? 3000 : 2500);
     let index = 0;
     let timerId: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
