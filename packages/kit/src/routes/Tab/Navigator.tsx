@@ -18,7 +18,6 @@ import {
 import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
 import { getRenderElapsedMs } from '@onekeyhq/shared/src/logger/scopes/app/scenes/perf';
 import {
-  EDevicePerformanceTier,
   calibrateDevicePerformanceTier,
   getDevicePerformanceTier,
 } from '@onekeyhq/shared/src/performance/devicePerformanceTier';
@@ -33,6 +32,7 @@ import { BottomMenu } from '../../provider/Container/PortalBodyContainer/BottomM
 import { WebPageTabBar } from '../../provider/Container/PortalBodyContainer/WebPageTabBar';
 import { TabFreezeOnBlurContext } from '../../provider/Container/TabFreezeOnBlurContainer';
 
+import { defaultPreloadEntry, tabPreloadConfig } from './preloadConfig';
 import { tabExtraConfig, useTabRouterConfig } from './router';
 
 // prevent pushModal from using unreleased Navigation instances during iOS modal animation by temporary exclusion,
@@ -114,34 +114,8 @@ export function TabNavigator() {
 
     defaultLogger.app.perf.tabPreloadStrategy(tier);
 
-    // Preload config per platform × tier
-    // high   → preload all key tabs
-    // medium → preload high-frequency tabs only
-    // low    → no preload, fully on-demand
-    const preloadConfig: Record<string, { queue: ETabRoutes[]; intervalMs: number }> = platformEnv.isNative
-      ? {
-          [EDevicePerformanceTier.high]: {
-            queue: [ETabRoutes.Swap, ETabRoutes.Discovery, ETabRoutes.Perp],
-            intervalMs: 2000,
-          },
-          [EDevicePerformanceTier.medium]: {
-            queue: [ETabRoutes.Swap, ETabRoutes.Perp],
-            intervalMs: 3000,
-          },
-        }
-      : {
-          [EDevicePerformanceTier.high]: {
-            queue: [ETabRoutes.Swap, ETabRoutes.Discovery, ETabRoutes.Perp, ETabRoutes.DeviceManagement, ETabRoutes.ReferFriends],
-            intervalMs: 1500,
-          },
-          [EDevicePerformanceTier.medium]: {
-            queue: [ETabRoutes.Swap, ETabRoutes.Market, ETabRoutes.Discovery],
-            intervalMs: 2500,
-          },
-        };
-
     const { queue: preloadQueue, intervalMs: PRELOAD_INTERVAL_MS } =
-      preloadConfig[tier] ?? { queue: [], intervalMs: 0 };
+      tabPreloadConfig[tier] ?? defaultPreloadEntry;
 
     if (preloadQueue.length === 0) return;
     let index = 0;
