@@ -3,6 +3,16 @@ import { LogToConsole, LogToLocal } from '../../../base/decorators';
 
 let _renderStartAt = 0;
 
+export function markRenderStart() {
+  if (_renderStartAt === 0) {
+    _renderStartAt = Date.now();
+  }
+}
+
+export function getRenderElapsedMs(): number {
+  return _renderStartAt > 0 ? Date.now() - _renderStartAt : 0;
+}
+
 export class AppPerfScene extends BaseScene {
   @LogToConsole()
   public logTime(params: { message: string; data?: any }) {
@@ -12,19 +22,6 @@ export class AppPerfScene extends BaseScene {
   @LogToLocal()
   public renderPhase(params: { name: string; elapsedMs: number }) {
     return params;
-  }
-
-  public markRenderStart() {
-    if (_renderStartAt === 0) {
-      _renderStartAt = Date.now();
-    }
-  }
-
-  public markRenderPhase(name: string) {
-    if (_renderStartAt > 0) {
-      const elapsedMs = Date.now() - _renderStartAt;
-      this.renderPhase({ name, elapsedMs });
-    }
   }
 
   @LogToLocal()

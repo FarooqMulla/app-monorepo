@@ -10,6 +10,7 @@ import {
 import appGlobals from '@onekeyhq/shared/src/appGlobals';
 import LazyLoad from '@onekeyhq/shared/src/lazyLoad';
 import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
+import { getRenderElapsedMs } from '@onekeyhq/shared/src/logger/scopes/app/scenes/perf';
 import { debugLandingLog } from '@onekeyhq/shared/src/performance/init';
 
 import { WalletBackupPreCheckContainer } from '../../components/WalletBackup';
@@ -95,7 +96,7 @@ const splitSubViewContext = { viewType: ESplitViewType.SUB };
 
 export function Container() {
   useLayoutEffect(() => {
-    defaultLogger.app.perf.markRenderPhase('Container:committed');
+    defaultLogger.app.perf.renderPhase({ name: 'Container:committed', elapsedMs: getRenderElapsedMs() });
   }, []);
   if (process.env.NODE_ENV !== 'production') {
     debugLandingLog('Container render');

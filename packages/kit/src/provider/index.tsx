@@ -17,6 +17,10 @@ import { SyncHomeAccountToDappAccountProvider } from '@onekeyhq/kit/src/views/Di
 import appGlobals from '@onekeyhq/shared/src/appGlobals';
 import LazyLoad from '@onekeyhq/shared/src/lazyLoad';
 import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
+import {
+  getRenderElapsedMs,
+  markRenderStart,
+} from '@onekeyhq/shared/src/logger/scopes/app/scenes/perf';
 import { debugLandingLog } from '@onekeyhq/shared/src/performance/init';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 import { useDebugComponentRemountLog } from '@onekeyhq/shared/src/utils/debug/debugUtils';
@@ -64,9 +68,9 @@ export function KitProvider(props: any = {}) {
 
   useDebugComponentRemountLog({ name: 'KitProvider' });
 
-  defaultLogger.app.perf.markRenderStart();
+  markRenderStart();
   useLayoutEffect(() => {
-    defaultLogger.app.perf.markRenderPhase('KitProvider:committed');
+    defaultLogger.app.perf.renderPhase({ name: 'KitProvider:committed', elapsedMs: getRenderElapsedMs() });
   }, []);
 
   // useFonts({

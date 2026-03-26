@@ -16,6 +16,7 @@ import {
   useSplitSubView,
 } from '@onekeyhq/components';
 import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
+import { getRenderElapsedMs } from '@onekeyhq/shared/src/logger/scopes/app/scenes/perf';
 import {
   EDevicePerformanceTier,
   calibrateDevicePerformanceTier,
@@ -91,7 +92,7 @@ export function TabNavigator() {
   const isTabletDetailView = useSplitSubView();
 
   useLayoutEffect(() => {
-    defaultLogger.app.perf.markRenderPhase('TabNavigator:committed');
+    defaultLogger.app.perf.renderPhase({ name: 'TabNavigator:committed', elapsedMs: getRenderElapsedMs() });
   }, []);
   useGlobalShortcuts();
   useCheckTabsChangedInDev(config);

@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 import { type LayoutChangeEvent } from 'react-native';
 
 import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
+import { getRenderElapsedMs } from '@onekeyhq/shared/src/logger/scopes/app/scenes/perf';
 
 import { Stack } from '../../primitives/Stack';
 
@@ -14,11 +15,11 @@ export type ISplashProps = PropsWithChildren;
 const noop = () => {};
 export function Splash({ children }: ISplashProps) {
   useLayoutEffect(() => {
-    defaultLogger.app.perf.markRenderPhase('Splash:committed');
+    defaultLogger.app.perf.renderPhase({ name: 'Splash:committed', elapsedMs: getRenderElapsedMs() });
   }, []);
   const resolveSplash = useRef<() => void>(noop);
   const handleExitComplete = useCallback(() => {
-    defaultLogger.app.perf.markRenderPhase('Splash:exitComplete');
+    defaultLogger.app.perf.renderPhase({ name: 'Splash:exitComplete', elapsedMs: getRenderElapsedMs() });
     globalThis.$$onekeyUIVisibleAt = Date.now();
     if (typeof globalThis.nativePerformanceNow === 'function') {
       globalThis.$$onekeyUIVisibleFromPerformanceNow =
@@ -29,7 +30,7 @@ export function Splash({ children }: ISplashProps) {
   const handleLayout = useCallback((e: LayoutChangeEvent) => {
     const { height } = e.nativeEvent.layout;
     if (height) {
-      defaultLogger.app.perf.markRenderPhase('Splash:onLayout');
+      defaultLogger.app.perf.renderPhase({ name: 'Splash:onLayout', elapsedMs: getRenderElapsedMs() });
       // close the splash after the react commit phase.
       setTimeout(() => {
         resolveSplash.current?.();

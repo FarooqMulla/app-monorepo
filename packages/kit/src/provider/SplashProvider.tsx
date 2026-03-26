@@ -9,6 +9,7 @@ import {
 
 import { Splash } from '@onekeyhq/components';
 import { defaultLogger } from '@onekeyhq/shared/src/logger/logger';
+import { getRenderElapsedMs } from '@onekeyhq/shared/src/logger/scopes/app/scenes/perf';
 import { debugLandingLog } from '@onekeyhq/shared/src/performance/init';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 
@@ -40,11 +41,12 @@ export const useDisplaySplash =
           const launchCallback = async () => {
             hasLaunchEventsExecutedRef.current = true;
             try {
-              defaultLogger.app.perf.markRenderPhase(
-                'pendingInstallTask:start',
-              );
+              defaultLogger.app.perf.renderPhase({
+                name: 'pendingInstallTask:start',
+                elapsedMs: getRenderElapsedMs(),
+              });
               await backgroundApiProxy.servicePendingInstallTask.processPendingInstallTask();
-              defaultLogger.app.perf.markRenderPhase('pendingInstallTask:done');
+              defaultLogger.app.perf.renderPhase({ name: 'pendingInstallTask:done', elapsedMs: getRenderElapsedMs() });
               setDisplaySplash(true);
             } catch (error) {
               defaultLogger.app.appUpdate.log(
