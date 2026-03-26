@@ -114,52 +114,36 @@ export function TabNavigator() {
 
     defaultLogger.app.perf.tabPreloadStrategy(tier);
 
-    // high  → preload all tabs
+    // Preload config per platform × tier
+    // high   → preload all key tabs
     // medium → preload high-frequency tabs only
-    // low   → no preload, fully on-demand
-    // NOTE: DeviceManagement and ReferFriends only exist on desktop/web
-    const nativeHighQueue = [
-      ETabRoutes.Swap,
-      ETabRoutes.Discovery,
-      ETabRoutes.Perp,
-    ];
-    const desktopHighQueue = [
-      ...nativeHighQueue,
-      ETabRoutes.DeviceManagement,
-      ETabRoutes.ReferFriends,
-    ];
-    const nativeMediumQueue = [ETabRoutes.Swap, ETabRoutes.Perp];
-    const desktopMediumQueue = [
-      ETabRoutes.Swap,
-      ETabRoutes.Market,
-      ETabRoutes.Discovery,
-    ];
+    // low    → no preload, fully on-demand
+    const preloadConfig: Record<string, { queue: ETabRoutes[]; intervalMs: number }> = platformEnv.isNative
+      ? {
+          [EDevicePerformanceTier.high]: {
+            queue: [ETabRoutes.Swap, ETabRoutes.Discovery, ETabRoutes.Perp],
+            intervalMs: 2000,
+          },
+          [EDevicePerformanceTier.medium]: {
+            queue: [ETabRoutes.Swap, ETabRoutes.Perp],
+            intervalMs: 3000,
+          },
+        }
+      : {
+          [EDevicePerformanceTier.high]: {
+            queue: [ETabRoutes.Swap, ETabRoutes.Discovery, ETabRoutes.Perp, ETabRoutes.DeviceManagement, ETabRoutes.ReferFriends],
+            intervalMs: 1500,
+          },
+          [EDevicePerformanceTier.medium]: {
+            queue: [ETabRoutes.Swap, ETabRoutes.Market, ETabRoutes.Discovery],
+            intervalMs: 2500,
+          },
+        };
 
-    let preloadQueue: ETabRoutes[];
-    switch (tier) {
-      case EDevicePerformanceTier.high:
-        preloadQueue = platformEnv.isNative
-          ? nativeHighQueue
-          : desktopHighQueue;
-        break;
-      case EDevicePerformanceTier.medium:
-        preloadQueue = platformEnv.isNative
-          ? nativeMediumQueue
-          : desktopMediumQueue;
-        break;
-      default:
-        preloadQueue = [];
-        break;
-    }
+    const { queue: preloadQueue, intervalMs: PRELOAD_INTERVAL_MS } =
+      preloadConfig[tier] ?? { queue: [], intervalMs: 0 };
 
     if (preloadQueue.length === 0) return;
-
-    // Native needs more breathing room than desktop; medium devices need even more
-    const isNative = platformEnv.isNative;
-    const PRELOAD_INTERVAL_MS =
-      tier === EDevicePerformanceTier.high
-        ? (isNative ? 2000 : 1500)
-        : (isNative ? 3000 : 2500);
     let index = 0;
     let timerId: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
