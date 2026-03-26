@@ -1,6 +1,4 @@
-import {
-  EDevicePerformanceTier,
-} from '@onekeyhq/shared/src/performance/devicePerformanceTier';
+import { EDevicePerformanceTier } from '@onekeyhq/shared/src/performance/devicePerformanceTier';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 import { ETabRoutes } from '@onekeyhq/shared/src/routes';
 
@@ -21,7 +19,7 @@ const nativePreloadConfig: Record<string, IPreloadEntry> = {
   },
 };
 
-const desktopPreloadConfig: Record<string, IPreloadEntry> = {
+const webPreloadConfig: Record<string, IPreloadEntry> = {
   [EDevicePerformanceTier.high]: {
     queue: [
       ETabRoutes.Swap,
@@ -40,7 +38,7 @@ const desktopPreloadConfig: Record<string, IPreloadEntry> = {
 
 export const tabPreloadConfig = platformEnv.isNative
   ? nativePreloadConfig
-  : desktopPreloadConfig;
+  : webPreloadConfig;
 
 export const defaultPreloadEntry: IPreloadEntry = {
   queue: [],
