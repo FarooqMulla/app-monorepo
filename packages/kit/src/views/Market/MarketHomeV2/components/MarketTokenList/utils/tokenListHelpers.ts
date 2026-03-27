@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js';
 import { getPresetNetworks } from '@onekeyhq/shared/src/config/presetNetworks';
 import type { IMarketTokenListItem } from '@onekeyhq/shared/types/marketV2';
 
+import type { IMarketTimeRangeValue } from '../../../types';
 import type { IMarketToken } from '../MarketTokenData';
 
 // Helper function to check if token is native and get normalized address for matching
@@ -62,7 +63,9 @@ function safeNumber(value: string | undefined, fallback = 0): number {
 }
 
 /**
- * Convert raw api item to component token shape
+ * Convert raw api item to component token shape.
+ * Time-ranged fields (e.g. priceChange4hPercent, volume1h) are selected
+ * by constructing the key as `${prefix}${timeSuffix}${suffix}`.
  */
 export function transformApiItemToToken(
   item: IMarketTokenListItem & { isNative?: boolean },
@@ -70,10 +73,12 @@ export function transformApiItemToToken(
     chainId,
     networkLogoUri,
     sortIndex,
+    timeRange,
   }: {
     chainId: string;
     networkLogoUri: string;
     sortIndex?: number;
+    timeRange?: IMarketTimeRangeValue;
   },
 ): IMarketToken {
   // Use token's own networkId to get network logo, fallback to passed chainId
@@ -82,19 +87,23 @@ export function transformApiItemToToken(
     ? getNetworkLogoUri(item.networkId)
     : networkLogoUri;
 
+  // Compute timeSuffix once, then read all time-ranged fields via dynamic key
+  const t = timeRange ?? '24h';
+  const r = item as unknown as Record<string, string | undefined>;
+
   return {
     id: `${item.address}${item.name}${tokenNetworkLogoUri}${item.symbol}`,
     name: item.name,
     symbol: item.symbol,
     address: item.address,
     price: safeNumber(item.price),
-    change24h: safeNumber(item.priceChange24hPercent),
+    change24h: safeNumber(r[`priceChange${t}Percent`]),
     marketCap: safeNumber(item.marketCap),
     liquidity: safeNumber(item.liquidity),
-    transactions: safeNumber(item.trade24hCount),
-    uniqueTraders: safeNumber(item.uniqueWallet24h),
+    transactions: safeNumber(r[`trade${t}Count`]),
+    uniqueTraders: safeNumber(r[`uniqueWallet${t}`]),
     holders: item.holders || 0,
-    turnover: safeNumber(item.volume24h),
+    turnover: safeNumber(r[`volume${t}`]),
     tokenImageUri: item.logoUrl || '',
     tokenImageUris: item.logoUrls,
     decimals: item.decimals,
@@ -109,8 +118,8 @@ export function transformApiItemToToken(
     communityRecognized: item.communityRecognized,
     stock: item.stock,
     walletInfo: {
-      buy: safeNumber(item.buy24hCount),
-      sell: safeNumber(item.sell24hCount),
+      buy: safeNumber(r[`buy${t}Count`]),
+      sell: safeNumber(r[`sell${t}Count`]),
     },
   };
 }

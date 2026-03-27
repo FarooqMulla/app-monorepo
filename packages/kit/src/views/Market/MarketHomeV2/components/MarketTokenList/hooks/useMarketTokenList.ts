@@ -9,10 +9,12 @@ import timerUtils from '@onekeyhq/shared/src/utils/timerUtils';
 import type { IMarketTokenListResponse } from '@onekeyhq/shared/types/marketV2';
 
 import { TIME_RANGE_TO_API_MAP } from '../../../types';
+
 import {
   getNetworkLogoUri,
   transformApiItemToToken,
 } from '../utils/tokenListHelpers';
+import type { IMarketTimeRangeValue } from '../../../types';
 
 import type { IMarketToken } from '../MarketTokenData';
 
@@ -22,7 +24,7 @@ interface IUseMarketTokenListParams {
   initialSortType?: 'asc' | 'desc';
   pageSize?: number;
   type?: string;
-  timeRange?: string;
+  timeRange?: IMarketTimeRangeValue;
 }
 
 export function useMarketTokenList({
@@ -120,6 +122,7 @@ export function useMarketTokenList({
       transformApiItemToToken(item, {
         chainId: networkId,
         networkLogoUri,
+        timeRange,
       }),
     );
 
@@ -131,6 +134,7 @@ export function useMarketTokenList({
 
     // Reset network switching state when new data arrives
     setIsNetworkSwitching(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- timeRange is intentionally excluded to avoid re-transforming stale data before new API response arrives
   }, [apiResult, hasNetworkId, networkId, networkLogoUri, trackNetworkLoading]);
 
   // Reset pagination when networkId, sortBy, or sortType changes
@@ -198,6 +202,7 @@ export function useMarketTokenList({
           transformApiItemToToken(item, {
             chainId: networkId,
             networkLogoUri,
+            timeRange,
           }),
         );
 
@@ -230,6 +235,7 @@ export function useMarketTokenList({
     minLiquidity,
     type,
     timeFrame,
+    timeRange,
     trackNetworkLoading,
     networkLogoUri,
   ]);
