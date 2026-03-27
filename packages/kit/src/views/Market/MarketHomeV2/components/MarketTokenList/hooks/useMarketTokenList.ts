@@ -9,13 +9,12 @@ import timerUtils from '@onekeyhq/shared/src/utils/timerUtils';
 import type { IMarketTokenListResponse } from '@onekeyhq/shared/types/marketV2';
 
 import { TIME_RANGE_TO_API_MAP } from '../../../types';
-
 import {
   getNetworkLogoUri,
   transformApiItemToToken,
 } from '../utils/tokenListHelpers';
-import type { IMarketTimeRangeValue } from '../../../types';
 
+import type { IMarketTimeRangeValue } from '../../../types';
 import type { IMarketToken } from '../MarketTokenData';
 
 interface IUseMarketTokenListParams {
